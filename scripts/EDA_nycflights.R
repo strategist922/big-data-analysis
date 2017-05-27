@@ -1,5 +1,9 @@
 # EDA for nycflights data
 # In order to create a spark dataframe we use createDataFrame
+# script adapted from: http://rpubs.com/Thong/data-analysis-with-r-and-spark
+
+# connecting to spark local cluster
+sc <- spark_connect(master = "local")
 
 flights_tbl <- copy_to(sc, nycflights13::flights, "flights")
 airportcounts <- flights_tbl %>% 
@@ -16,3 +20,19 @@ delay <- flights_tbl %>%
   summarise(count = n(), dist = mean(distance), delay = mean(arr_delay)) %>%
   filter(count > 20, dist < 2000, !is.na(delay)) %>%
   collect
+
+# plot delays
+library(ggplot2)
+
+ggplot(delay, aes(dist, delay)) +
+  geom_point(aes(size = count), alpha = 1/2) +
+  geom_smooth(method = "loess") +
+  scale_size_area(max_size = 2)
+
+# To view the spark web console
+spark_web(sc)
+# To see the log use the spark_log()
+spark_log(sc, n=10)
+
+# stop the spark local cluster
+spark_disconnect(sc)
