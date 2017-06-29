@@ -12,16 +12,16 @@ library(sparklyr)
 
 # connecting to spark local cluster
 sc <- spark_connect(master = "local", version = "1.6.2")
+# print the spark version
+spark_version(sc)
+# check data tables in spark local cluster
+src_tbls(sc)
 # Copy data to spark local instance
 flights_tbl <- copy_to(sc, nycflights13::flights, "flights", overwrite = TRUE)
 # check data dimension
 dim(flights_tbl)
 # check amount of memory taken up by the flights_tbl tibble
 object.size(flights_tbl)
-# print the spark version
-spark_version(sc)
-# check data tables in spark local cluster
-src_tbls(sc)
 # check colnames data table
 colnames(flights_tbl)
 
@@ -30,6 +30,9 @@ colnames(flights_tbl)
 library(DBI)
 flightdetail.df<-dbGetQuery(sc, "select flight, tailnum, origin, dest FROM flights where year=2013")
 str(flightdetail.df)
+
+# Writing Data to a local .csv file
+spark_write_csv(flightdetail.df,"local_csv_file/flight_detail.csv") # generates error. 
 
 # dplyr usage
 airportcounts <- flights_tbl %>% 
@@ -72,10 +75,7 @@ fit
 # For linear regression models produced by Spark, we can use summary() to learn a bit more about the quality of our fit, and the statistical significance of each of our predictors.
 summary(fit)
 
-# Reading and Writing Data
-# You can read and write data in CSV, JSON, and Parquet formats. Data can be stored in HDFS, S3, or on the lcoal filesystem of cluster nodes.
-temp_csv <- tempfile(fileext = ".csv")
-spark_write_csv(flightdetail.df,"flight_detail.csv")
+
 
 
 
