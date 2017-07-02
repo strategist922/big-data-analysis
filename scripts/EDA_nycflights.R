@@ -28,11 +28,11 @@ colnames(flights_tbl)
 # USING SQL 
 #  It’s also possible to execute SQL queries directly against tables within a Spark cluster. The spark_connection object implements a DBI interface for Spark, so you can use dbGetQuery to execute SQL and return the result as an R data frame
 library(DBI)
-flightdetail.df<-dbGetQuery(sc, "select flight, tailnum, origin, dest FROM flights where year=2013")
+flights2013<- tbl(sc, sql("select flight, tailnum, origin, dest FROM flights where year=2013"))
 str(flightdetail.df)
 
 # Writing Data to a local .csv file
-spark_write_csv(flightdetail.df,"local_csv_file/flight_detail.csv") # generates error. 
+spark_write_csv(flights2013,"local_csv_file/flights2013.csv", header=TRUE)
 
 # dplyr usage
 airportcounts <- flights_tbl %>% 
