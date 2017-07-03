@@ -12,14 +12,21 @@ The following lines of code will install *sparklyr*. sparklyr works with a full 
 
 ```{r, eval = FALSE}
 #load sparklyr & dplyr
-devtools::install_github("rstudio/sparklyr")
-library(sparklyr)
-library(dplyr)
+> devtools::install_github("rstudio/sparklyr")
+> library(sparklyr)
+> library(dplyr)
 
-# install spark
-spark_install(version = "2.1.0")
+# install spark if not already installed
+> spark_install(version = "2.1.0")
+# check spark installed versions
+> spark_installed_versions()
 # Connecting to spark using spark_connect, on a local connection. 
-sc <- spark_connect(master = "local")
+> sc <- spark_connect(master = "local", version="2.1.0")
+# print the spark version
+> spark_version(sc)
+# check data tables in spark local cluster
+> src_tbls(sc) # If no table copied in local cluster, then NULL or character(0) will be returned
+
 ```
 
 ### Useful resources
@@ -34,18 +41,18 @@ This regression will try to predict wine quality based on its pH, alcohol, densi
 
 ```{r, eval = F}
 # Loading local data
-wine <- read.csv("data/wine.csv")
+> wine <- read.csv("data/wine.csv")
 # The copy_to function copys the local data frame to a spark data table
-wine_tbl <- copy_to(sc, wine) 
+> wine_tbl <- copy_to(sc, wine, overwrite=TRUE) 
 
-# Set a seed
-set.seed(11)
+# Set a seed for result reproducibility
+> set.seed(11)
 ```
 
 Let's first create our model using Spark's linear regression.
 
 ```{r, eval = F}
-fit <- wine_tbl %>% ml_linear_regression(response = "quality",
+> fit <- wine_tbl %>% ml_linear_regression(response = "quality",
                                          features = c("pH", "alcohol", "density", "type"))
 ```
 
@@ -53,7 +60,7 @@ Now that we have created a working linear regression model using Spark, lets cre
 
 ```{r, eval = F}
 # creating lm using base functions 
-fit_base <- lm(quality ~ pH + alcohol + density + type, data = wine_tbl)
+> fit_base <- lm(quality ~ pH + alcohol + density + type, data = wine_tbl)
 
 > summary(fit)
 Call: ml_linear_regression(., response = "quality", features = c("pH", "alcohol", "density", "type"))
@@ -110,9 +117,9 @@ Now that we have created our base k-mean clusters, lets see how they compare to 
 
 ```{r, eval = F}
 # Create k-means using spark
-wine <- wine %>% mutate(white = ifelse(type == "White", 1, 0))
-wine_tbl <- copy_to(sc, wine, overwrite = TRUE)
-spark_kmeans <-  wine_tbl %>% ml_kmeans(centers = 3, iter.max = 10,
+> wine <- wine %>% mutate(white = ifelse(type == "White", 1, 0))
+> wine_tbl <- copy_to(sc, wine, overwrite = TRUE)
+> spark_kmeans <-  wine_tbl %>% ml_kmeans(centers = 3, iter.max = 10,
                                         features = c("quality", "pH", "alcohol", "density", "white"))
 ```
 
