@@ -1,5 +1,5 @@
 ---
-title: "Exploring sparklyr: Kmeans, Linear & Logistic Regression, and other Machine Learning algorithms"
+title: "Exploring sparklyr: regression, supervised and unsupervised machine learning algorithms"
 author: "Ashish Dutt"
 output: html_document
 ---
